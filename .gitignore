@@ -1,0 +1,17 @@
+# OSPAL config, log files and archive
+ospal.ini
+logs/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Environment files
+.env
+
+# Editor and OS
+.DS_Store
+Thumbs.db
+*.swp
+*.swo

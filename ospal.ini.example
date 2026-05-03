@@ -1,0 +1,321 @@
+; ============================================================
+; OSPAL - Open Source POCSAG Alert Logger
+; Version 0.7.0 - Configuration file
+; ============================================================
+
+[receiver]
+; Frequency to listen on (MHz)
+frequency = 161.4375M
+
+; Receiver gain in dB - set automatically by: ./ospal-ctl.sh calibrate
+; Typical values: 19.7 (FC0013 tuner), 40.2 (R820T tuner)
+gain = 19.7
+
+; PPM calibration offset - set automatically by: ./ospal-ctl.sh calibrate
+ppm = 0
+
+; Sampling rate in Hz - set automatically by: ./ospal-ctl.sh calibrate
+sample_rate = 22050
+
+; Decode format: alpha (recommended), auto, numeric, skyper
+; NOTE: 'auto' may produce duplicate entries for the same message in multiple
+; formats, potentially triggering alerts multiple times for the same event.
+decode_format = alpha
+
+
+; ============================================================
+[smtp]
+; Master switch - disables all mail when false, regardless of other settings
+; NOTE: false by default for legal reasons. See README for details.
+; Testmail (-m / ospal-ctl.sh testmail) always works regardless of this setting.
+mail_enabled = false
+
+; Send mail for individual alerts (true/false)
+; Requires mail_enabled = true
+; Set to false if you only want daily log summary mails, not individual alerts
+mail_alerts = true
+
+; Retry settings for failed mail delivery
+; retry_count: number of attempts before giving up (default: 3)
+; retry_delay: seconds to wait between attempts (default: 30)
+retry_count = 3
+retry_delay = 90
+
+; -- Daily log summary mails ---------------------------------------------------
+; Time to send daily log summary mails (24h format, HH:MM)
+mail_log_time = 06:00
+
+; Which logs to include in daily summary mails (each sent as a separate mail)
+; Non-existent logs are reported rather than silently skipped
+mail_log_raw      = false
+mail_log_filtered = false
+mail_log_smtp     = false
+mail_log_ntfy     = false
+mail_log_error    = true
+mail_log_keywords = false
+
+; -- SMTP server settings ------------------------------------------------------
+host = send.one.com
+
+; Port: 465 for SSL/TLS, 587 for STARTTLS
+port = 465
+
+; Connection type: ssl or starttls
+type = ssl
+
+; Sender address (OSPAL's dedicated mail account)
+user = ospal@yourmail.com
+
+; Password
+; NOTE: If password contains % characters, escape them as %% in this file
+password = mypassword
+
+; Recipient address
+recipient = alarm@yourmail.com
+
+
+; ============================================================
+[ntfy]
+; Enable ntfy push notifications (true/false)
+; Works alongside or instead of mail. false by default.
+ntfy_enabled = false
+
+; Send ntfy notifications for individual alerts (true/false)
+; Requires ntfy_enabled = true
+ntfy_alerts = true
+
+; ntfy server URL
+; Use https://ntfy.sh for the public server, or your own self-hosted instance
+; Example self-hosted: https://ntfy.yourdomain.com
+url = http://localhost
+
+; ntfy topic (the channel name your app subscribes to)
+topic = pocsagalerts
+
+; Access token for authenticated topics (leave empty for public topics)
+; Generate in your ntfy account settings or server configuration
+token =
+
+; -- Daily log summary via ntfy ------------------------------------------------
+ntfy_log_raw      = false
+ntfy_log_filtered = false
+ntfy_log_smtp     = false
+ntfy_log_ntfy     = false
+ntfy_log_error    = true
+ntfy_log_keywords = false
+
+; -- ntfy message format -------------------------------------------------------
+; Same variables as [mail_format] plus {priority}
+; Leave these commented out to use the same defaults as mail_format
+; subject = {keyword} - {message_preview}
+; body = {timestamp}\n{message}\n\nAddress: {address}\nUptime: {uptime}
+
+
+; ============================================================
+; Alert mail and ntfy format - variables available:
+;   {keyword}         Matched rule keyword e.g. BRAND
+;   {message}         Full message text
+;   {message_preview} First 60 characters of message
+;   {address}         POCSAG address
+;   {function}        POCSAG function number
+;   {timestamp}       Date and time of message
+;   {uptime}          Time since OSPAL started
+;   {last_restart}    Date/time OSPAL last started
+;   {frequency}       Listening frequency
+;   {errors_exist}    Summary of today's error log, or "No errors"
+;   {ospal_version}   OSPAL version number
+;   {priority}        ntfy priority for this rule (min/low/default/high/max)
+; ============================================================
+[mail_format]
+subject = {keyword} - {message_preview}
+body = {timestamp}
+    {message}
+
+    Address  : {address}
+    Function : {function}
+    Frequency: {frequency}
+    Uptime   : {uptime}
+    Started  : {last_restart}
+    Errors   : {errors_exist}
+    OSPAL    : v{ospal_version}
+
+
+; ============================================================
+[filtering]
+; false = all messages pass to filtered log (recommended during initial setup)
+; true  = blacklist_addresses and blacklist_keywords are applied
+enabled = true
+
+; Addresses filtered from filtered log and alerts (comma-separated)
+blacklist_addresses = 1600000
+
+; Keywords filtered from filtered log and alerts (comma-separated, case-insensitive)
+blacklist_keywords =
+
+
+; ============================================================
+[mail_rules]
+; Rules for which messages trigger alerts (mail and/or ntfy).
+; Rules between each other are always OR - any match sends an alert.
+;
+; Operators (UPPERCASE ONLY - lowercase is treated as search text):
+;   AND  - both conditions must be present
+;   NOT  - condition must NOT be present
+;
+; Address-based rule: ADDRESS:320008
+; Combined: fire AND alarm, fire NOT test
+;
+; ntfy priority per rule (optional, default: default):
+; Add a _priority key after the rule, e.g.:
+;   rule1 = brand
+;   rule1_priority = high
+;
+; ntfy priority levels: min, low, default, high, max
+; Priority is also available as {priority} in mail and ntfy format templates.
+
+rule1 = brand
+rule1_priority = high
+
+rule2 = trafikolycka
+rule2_priority = high
+
+rule3 = inbrottslarm
+rule3_priority = default
+
+rule4 = röklukt
+rule4_priority = high
+
+rule5 = rökutveckling
+rule5_priority = high
+
+rule6 = explosion
+rule6_priority = max
+
+rule7 = personlarm
+rule7_priority = default
+
+rule8 = ivpa
+rule8_priority = low
+
+rule9 = sjukvårdslarm
+rule9_priority = low
+
+rule10 = resurslarm
+rule10_priority = default
+
+
+; ============================================================
+[logging]
+; Log directory
+; Relative paths are resolved from the OSPAL script directory,
+; e.g. logs -> /home/dk/OSPAL/logs
+; Absolute paths also work, e.g. /var/log/ospal
+log_dir = logs
+
+; Log level: debug, info, warning, error, critical
+; debug  = most verbose, includes startup details
+; info   = normal operation (recommended)
+log_level = debug
+
+; Individual log file toggles
+raw_enabled      = true
+filtered_enabled = false
+keywords_enabled = true
+smtp_enabled     = true
+ntfy_log_enabled = true
+error_enabled    = true
+
+; Terminal output: raw, filtered or keywords
+; raw      = show everything (recommended when setting up)
+; filtered = show only messages passing the filter
+; keywords = show only messages that matched a rule (alerts only)
+terminal_output = raw
+
+; -- Duplicate suppression -----------------------------------------------------
+; Prevents the same alert from being sent multiple times when the same incident
+; is broadcast to several pager addresses within a short time window.
+duplicate_suppression    = true
+duplicate_window_seconds = 90
+
+; Number of consecutive characters that must match for suppression to trigger.
+; Matching is performed after character mapping (Swedish chars translated).
+; Default: 32 (covers variations in resource numbers at end of messages)
+duplicate_match_chars = 32
+
+; -- Log archiving -------------------------------------------------------------
+; Previous day's logs are moved to logs/archive/YYYY-MM/ at midnight.
+; Maximum age of archived logs in days (0 = keep forever)
+archive_keep_days = 0
+
+
+; ============================================================
+[charset]
+; Swedish character mapping for POCSAG (ISO 646 Swedish / 7-bit ASCII variant)
+91 = Ä
+92 = Ö
+93 = Å
+123 = ä
+124 = ö
+125 = å
+
+; Addresses excluded from character mapping (comma-separated)
+charset_blacklist_addresses = 1600000
+
+; POCSAG functions excluded from character mapping (comma-separated)
+; Remove entries if you find real text on these functions
+; Example: charset_blacklist_functions = 0,1
+charset_blacklist_functions =
+
+
+; ============================================================
+[alert]
+; Run an external script when a message matches a rule.
+; Triggered for the same messages that would send mail/ntfy,
+; subject to duplicate suppression, regardless of mail/ntfy settings.
+enabled = false
+
+; Path to alert script (absolute or relative to OSPAL directory)
+script = alert-scripts/ir_alarm/ir_alarm.py
+
+; Execution mode:
+;   interrupt - new alert sends SIGTERM to running script (+ 2s grace) then starts fresh
+;               Your script should handle SIGTERM to clean up before exiting.
+;   queue     - alerts are queued, script runs one at a time
+mode = queue
+
+; Maximum time the script is allowed to run in seconds
+timeout = 600
+
+; What to pass to the script as a command-line argument:
+;   none    - no argument passed
+;   keyword - matched rule keyword e.g. "BRAND"
+;   message - full message text
+pass_message = keyword
+
+; Maximum number of alerts waiting in queue (queue mode only)
+; Oldest entry is dropped when queue is full
+queue_max = 2
+
+
+; ============================================================
+[silent_receiver]
+; Send a warning if no output is received from multimon-ng for a period of time.
+; This can indicate that the dongle has disconnected or rtl_fm has crashed.
+enabled = true
+
+; Minutes of silence before the first warning is sent
+silent_minutes = 12
+
+; Maximum number of warnings to send per silence period
+; Counter resets when activity resumes
+; Default: 2
+max_warnings = 2
+
+; Send warning via mail (requires mail_enabled = true)
+send_mail = true
+
+; Send warning via ntfy (requires ntfy_enabled = true)
+send_ntfy = true
+
+; Trigger the alert script with the keyword OSPAL-SILENT
+trigger_alert = true
