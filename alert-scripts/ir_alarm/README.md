@@ -1,7 +1,7 @@
 # IR Remote Control Scripts
 
 Three Python scripts for learning, sending, and sequencing IR remote control
-signals on a Raspberry Pi Zero W2.
+signals on any Raspberry Pi.
 
 ---
 
