@@ -122,6 +122,7 @@ cd ospal
 ### 4. Configure ospal.ini
 
 ```bash
+cp ospal.ini.example ospal.ini
 nano ospal.ini
 ```
 
@@ -131,7 +132,7 @@ nano ospal.ini
 chmod +x ospal-ctl.sh
 ```
 
-### 6. Install as a systemd service
+### 6. Install as a systemd service (skip this step if you only want to run ospal in terminal)
 
 ```bash
 sudo ./ospal-ctl.sh install-service
@@ -144,6 +145,8 @@ sudo ./ospal-ctl.sh install-service
 ```
 
 Let the dongle warm up for 5-10 minutes before calibrating for best results.
+If calibration return numbers that are all over the place, let the dongle warm up for longer,
+or just try to set ppm = 0. 
 
 ### 8. Test mail and/or ntfy
 
