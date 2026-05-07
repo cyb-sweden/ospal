@@ -1,4 +1,9 @@
 # OSPAL
+
+> **Mirror** - This is a read-only mirror of https://codeberg.org/cyberdream/ospal
+> Please submit issues and pull requests there.
+> 
+
 ### Open Source POCSAG Alert Logger - v0.7.1
 
 OSPAL ist ein headless, konfigurierbares Werkzeug zum Empfangen, Dekodieren und Protokollieren von POCSAG-Nachrichten über einen RTL-SDR-Dongle.
