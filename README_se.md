@@ -115,7 +115,7 @@ rtl_test
 ### 3. Klona OSPAL
 
 ```bash
-git clone https://codeberg.org/dittnamn/ospal.git
+git clone https://codeberg.org/cyberdream/ospal.git
 cd ospal
 ```
 
